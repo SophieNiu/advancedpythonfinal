@@ -39,17 +39,22 @@ def get_bars():
         make_request_using_cache(baseurl, main_url), 'html.parser')
     bars = main_page.findAll('div', class_="spot-block")
 
-    bls = []
     for bar in bars[:10]:
         bar_name = bar.find('h3').text.strip()
         # the page for next round of scripting, not the bar's url
         bar_rev_url = bar.find('a').get('href')
         bar_price = bar.find(
             'span', class_='address-price-rating')['data-price']
+        # the single line address
         bar_addr = bar.find(
             'div', class_='spot-block__address').text
         for t in bar_addr:
             bar_addr = bar_addr.replace('$', '').strip()
+
+        # find the neighborhood that the bar is located in
+
+        bar_neigh = bar.find('div', class_='overview-content')
+        print(bar_neigh)
 
         try:
             bar_img = bar.find('div', class_='spot-block__image-wrapper')
@@ -61,7 +66,7 @@ def get_bars():
         html = make_request_using_cache(baseurl, bar_rev_url)
 
         detail_page = BeautifulSoup(html, 'html.parser')
-        
+
         try:
             bar_phone = detail_page.find(
                 'a', class_="post__sidebar__info__phone").text
@@ -82,7 +87,7 @@ def get_bars():
             hours = open_day.find('p', class_='weekday__hours').text
             open_hours = (day, hours)
             opens.append(open_hours)
-        print(opens)
+        # print(opens)
 
 
 def params_unique_combination(baseurl, endurl=""):
