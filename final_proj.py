@@ -123,7 +123,7 @@ def get_bars():
 
 def create_bar_csv(barls):
     with open('data/bars_info.csv', mode='w', newline='') as bars:
-        fieldnames = ['name', 'price', 'img', 'web',
+        fieldnames = ['name', 'price', 'img', 'web', 'phone',
                       'addr', 'hours', 'review', 'neighborhood']
         bar_writer = csv.DictWriter(bars, fieldnames=fieldnames)
 
@@ -131,7 +131,7 @@ def create_bar_csv(barls):
 
         for bar in barls:
             bar_writer.writerow({'name': bar.name, 'price': bar.price, 'img': bar.img, 'web': bar.url,
-                                 'addr': bar.addr, 'hours': bar.hours, 'review': bar.review, 'neighborhood': bar.neigh})
+                                 'phone': bar.phone, 'addr': bar.addr, 'hours': bar.hours, 'review': bar.review, 'neighborhood': bar.neigh})
 
 
 def create_neigh_csv(neigh_dict):
@@ -232,52 +232,71 @@ def init_db():
     conn.commit()
 
     statement = '''
+            CREATE TABLE "Neighborhoods" (
+            "Id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+            "NeighName"	TEXT
+            );
+
+            '''
+    cur.execute(statement)
+    # print('create Neighborhoods table')
+
+    statement = '''
         CREATE TABLE "Bars" (
-        "Id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-        "Company"	TEXT,
-        "SpecificBeanBarName"	TEXT,
-        "REF"	TEXT,
-        "ReviewDate"	TEXT,
-        "CocoaPercent"	REAL,
-        "CompanyLocationId"	INTEGER NOT NULL,
-        "Rating"	REAL,
-        "BeanType"	TEXT,
-        "BroadBeanOriginId" INTEGER,
-        FOREIGN KEY (CompanyLocationId) REFERENCES Countries(Id),
-		FOREIGN KEY (BroadBeanOriginId) REFERENCES Countries(Id)
+	    "Id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+	    "Name"	TEXT,
+	    "Price"	INTEGER,
+	    "Image"	TEXT,
+	    "Website"	TEXT,
+        "Phone"     TEXT,
+	    "Address"	TEXT,
+	    "Hours"	TEXT,
+	    "Review"	TEXT,
+	    "Neighborhood"	INTEGER NOT NULL,
+        FOREIGN KEY (Neighborhood) REFERENCES Neighborhoods(Id)
     	);
 
         '''
-
     cur.execute(statement)
     # print('create Bars table')
 
-    statement = '''
-        CREATE TABLE "Countries" (
-	    "Id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-	    "Alpha2"	TEXT,
-	    "Alpha3"	TEXT,
-	    "EnglishName"	TEXT,
-	    "Region"	TEXT,
-	    "Subregion"	TEXT,
-	    "Population"	INTEGER,
-	    "Area"	REAL
-        );
-
-        '''
-    cur.execute(statement)
-    # print('create countries table')
     conn.commit()
     conn.close()
 
 
-(barls, neighls) = get_bars()
-neigh_dic = get_neigh(neighls)
-for bar in barls:
-    bar.set_neigh(neigh_dic)  # update the foreign key
+def insert_data(bar_db, neigh_db):
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
 
-create_bar_csv(barls)
-create_neigh_csv(neigh_dic)
+    for inst in neigh_db:
+        insertion = (inst[0], inst[1])
+        statement = 'INSERT INTO "Neighborhoods" '
+        statement += 'VALUES (?, ?)'
+        cur.execute(statement, insertion)
+    print('insert neighborhoods data.')
+
+    for inst in bar_db:
+        insertion = (None, inst[0], float(inst[1]), inst[2], inst[3],
+                     inst[4], inst[5], inst[6], inst[7], float(inst[8]))
+        statement = 'INSERT INTO "Bars" '
+        statement += 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)'
+        cur.execute(statement, insertion)
+
+    print('insert bar data')
+    conn.commit()
+    conn.close()
+
+
+# (barls, neighls) = get_bars()
+# neigh_dic = get_neigh(neighls)
+# for bar in barls:
+#     bar.set_neigh(neigh_dic)  # update the foreign key
+
+# create_bar_csv(barls)
+# create_neigh_csv(neigh_dic)
 
 bar_db = read_csv_to_db(BARSCSV, 'name')
 neigh_db = read_csv_to_db(NEIGHBORCSV, 'id')
+
+init_db()
+insert_data(bar_db, neigh_db)
