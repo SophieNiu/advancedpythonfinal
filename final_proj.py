@@ -3,10 +3,8 @@ from bs4 import BeautifulSoup
 import json
 import re
 import csv
-# import mysql.connector
-# import configparser
-# import plotly
-# import plotly.graph_objs as go
+import sqlite3
+import sys
 
 ### global variables ###
 # base url for makeing requests in NPS
@@ -47,7 +45,7 @@ def get_bars():
         # the page for next round of scripting, not the bar's url
         bar_rev_url = bar.find('a').get('href')
 
-        ### gather general bar info: name, price rating, address, neighborhood, img ###
+        ### gather general bar info: name, price rating, address, neighborhood, img,review ###
         bar_name = bar.find('h3').text.strip()
         bar_price = bar.find(
             'span', class_='address-price-rating')['data-price']
@@ -66,7 +64,7 @@ def get_bars():
                 bar_addr = bar_addr.replace('$', '').strip()
         except:
             bar_addr = 'No address available.'
-        print(bar_name)
+        # print(bar_name)
 
         # find the neighborhood that the bar is located in
         try:
@@ -76,11 +74,18 @@ def get_bars():
         except:
             bar_neigh = 'No neighborhood identified.'
 
+        # review contains double quotes and single quotes
+        try:
+            bar_rev = bar.find(
+                'p' > 'div', class_='spot-block__description-section').text.strip()
+        except:
+            bar_rev = 'No review available'
+
         # create a list of neighborhoods
         if bar_neigh not in neighls:
             neighls.append(bar_neigh)
 
-        ### scrape the individual page to get additional details: phone, website, open hours, review###
+        ### scrape the individual page to get additional details: phone, website, open hours###
         html = make_request_using_cache(baseurl, bar_rev_url)
 
         detail_page = BeautifulSoup(html, 'html.parser')
@@ -100,15 +105,14 @@ def get_bars():
         bar_hours = detail_page.findAll('div', class_='weekday')
         opens = []
         # hours could be an empty list
-        for open_day in bar_hours:
-            day = open_day.find('p', class_='weekday__day').text
-            hours = open_day.find('p', class_='weekday__hours').text
-            open_hours = (day, hours)
-            opens.append(open_hours)
-
-        # review contains double quotes and single quotes
-        bar_rev = detail_page.find(
-            'p' > 'div', class_='post__content__text-block').text
+        try:
+            for open_day in bar_hours:
+                day = open_day.find('p', class_='weekday__day').text
+                hours = open_day.find('p', class_='weekday__hours').text
+                open_hours = (day, hours)
+                opens.append(open_hours)
+        except:
+            opens = []
 
         new_Bar = Bar(name=bar_name, rev=bar_rev, addr=bar_addr, phone_num=bar_phone,
                       url=bar_url, price=bar_price, hours=opens, img=bar_img, neigh=bar_neigh)
@@ -118,7 +122,7 @@ def get_bars():
 
 
 def create_bar_csv(barls):
-    with open('bars_info.csv', mode='w', newline='') as bars:
+    with open('data/bars_info.csv', mode='w', newline='') as bars:
         fieldnames = ['name', 'price', 'img', 'web',
                       'addr', 'hours', 'review', 'neighborhood']
         bar_writer = csv.DictWriter(bars, fieldnames=fieldnames)
@@ -131,7 +135,7 @@ def create_bar_csv(barls):
 
 
 def create_neigh_csv(neigh_dict):
-    with open('neighborhoods.csv', mode='w', newline='') as bars:
+    with open('data/neighborhoods.csv', mode='w', newline='') as bars:
         fieldnames = ['id', 'name']
         writer = csv.DictWriter(bars, fieldnames=fieldnames)
 
@@ -193,6 +197,80 @@ def make_request_using_cache(baseurl, endurl=""):
         return CACHE_DICTION[unique_ident]
 
 
+### create table and set up database ###
+
+# Part 1: Read data from CSV and JSON into a new database called nycbars.db
+DBNAME = 'nycbars.db'
+BARSCSV = 'data/bars_info.csv'
+NEIGHBORCSV = 'data/neighborhoods.csv'
+
+
+def read_csv_to_db(csvfile, header):
+    fn = open(csvfile)
+    file_data = csv.reader(fn)
+    csv_data = []
+    for row in file_data:
+        if row[0] != header:
+            csv_data.append(row)
+    return csv_data
+
+
+def init_db():
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+
+    # Drop tables
+    statement = '''
+        DROP TABLE IF EXISTS 'Bars';
+    '''
+    cur.execute(statement)
+    statement = '''
+        DROP TABLE IF EXISTS 'Neighborhoods';
+    '''
+    cur.execute(statement)
+
+    conn.commit()
+
+    statement = '''
+        CREATE TABLE "Bars" (
+        "Id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+        "Company"	TEXT,
+        "SpecificBeanBarName"	TEXT,
+        "REF"	TEXT,
+        "ReviewDate"	TEXT,
+        "CocoaPercent"	REAL,
+        "CompanyLocationId"	INTEGER NOT NULL,
+        "Rating"	REAL,
+        "BeanType"	TEXT,
+        "BroadBeanOriginId" INTEGER,
+        FOREIGN KEY (CompanyLocationId) REFERENCES Countries(Id),
+		FOREIGN KEY (BroadBeanOriginId) REFERENCES Countries(Id)
+    	);
+
+        '''
+
+    cur.execute(statement)
+    # print('create Bars table')
+
+    statement = '''
+        CREATE TABLE "Countries" (
+	    "Id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+	    "Alpha2"	TEXT,
+	    "Alpha3"	TEXT,
+	    "EnglishName"	TEXT,
+	    "Region"	TEXT,
+	    "Subregion"	TEXT,
+	    "Population"	INTEGER,
+	    "Area"	REAL
+        );
+
+        '''
+    cur.execute(statement)
+    # print('create countries table')
+    conn.commit()
+    conn.close()
+
+
 (barls, neighls) = get_bars()
 neigh_dic = get_neigh(neighls)
 for bar in barls:
@@ -200,3 +278,6 @@ for bar in barls:
 
 create_bar_csv(barls)
 create_neigh_csv(neigh_dic)
+
+bar_db = read_csv_to_db(BARSCSV, 'name')
+neigh_db = read_csv_to_db(NEIGHBORCSV, 'id')
