@@ -33,10 +33,10 @@
     </tr>
     {% for s in nbs %}
     <tr>
-        <td>{{s[0]}}1</td>
-        <td>{{s[1]}}</td>
-        <td>{{s[2]}}</td>
-        <td>{{s[3]}}</td>
+        <td>{{s['id']}}</td>
+        <td>{{s['name']}}</td>
+        <td>{{s['bar_num']}}</td>
+        <td>{{s['avg_price']}}</td>
     </tr>
     {% endfor %}
 </table>

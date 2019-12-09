@@ -4,7 +4,6 @@ import json
 import re
 import csv
 import sqlite3
-import sys
 
 ### global variables ###
 # base url for makeing requests in NPS
