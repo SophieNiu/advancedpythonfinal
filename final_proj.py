@@ -333,34 +333,14 @@ def insert_calc_neigh():
     conn.close()
 
 
-def list_neighborhood(command):
-    '''
-    Select list neighborhood based on the command, default is by the order in the database
-    '''
-
-    # start the connection
-    conn = sqlite3.connect(DBNAME)
-    cur = conn.cursor()
-
-    statement = '''
-    SELECT * 
-    FROM Neighborhoods
-    '''
-    cur.execute(statement)
-    conn.commit()
-    output = cur.fetchall()
-    conn.close()
-    return output
-
-
 def update_neigh_csv():
     # reference: https://stackoverflow.com/questions/18827028/write-to-csv-from-sqlite3-database-in-python
     with sqlite3.connect("nycbars.db") as connection:
         csvWriter = csv.writer(open("data/neighborhoods.csv", "w"))
         # add header
-        # fieldnames = ['id', 'name']
+        fieldnames = ['id', 'name', 'bar_num', 'avg_price']
         # writer = csv.DictWriter(bars, fieldnames=fieldnames)
-        # writer.writeheader()
+        csvWriter.writerow(fieldnames)
 
         cur = connection.cursor()
 
@@ -391,5 +371,4 @@ insert_data(bar_db, neigh_db)
 
 
 insert_calc_neigh()
-# print(list_neighborhood())
 update_neigh_csv()

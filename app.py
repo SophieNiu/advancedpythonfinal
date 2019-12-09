@@ -4,20 +4,13 @@ import model
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route('/index')
 def index():
-    return '''
-        <img src="/static/drinks.jpg"/>
-        <h1>New York City Bar Explorations</h1>
-        <ul>
-            <li><a href="/neighborhoods">Start from a list of New York Neighborhoods.</a></li>
-            <li><a href="/bars'>Dive right into bars.</a></li>
-        </ul>
-    '''
+    return render_template("index.html")
 
 
 @app.route('/bars', methods=['GET', 'POST'])
-def hello():
+def bars():
     if request.method == 'POST':
         firstname = request.form['firstname']
         lastname = request.form['lastname']
@@ -25,21 +18,36 @@ def hello():
         firstname = ''
         lastname = ''
 
-    return render_template("hello.html", firstname=firstname, lastname=lastname)
+    return render_template("bars.html", firstname=firstname, lastname=lastname)
 
 
 @app.route('/neighborhoods', methods=['GET', 'POST'])
-def bball():
+def neighborhoods():
     if request.method == 'POST':
         sortby = request.form['sortby']
         sortorder = request.form['sortorder']
-        seasons = model.get_bball_seasons(sortby, sortorder)
+        neigh_id = request.form['nid']
+        nbs = model.get_neighbors(sortby, sortorder)
     else:
-        seasons = model.get_bball_seasons()
+        neigh_id = ''
+        nbs = model.get_neighbors()
 
-    return render_template("seasons.html", seasons=seasons)
+    return render_template("neighborhoods.html", nid=neigh_id, neighborhoods=nbs)
+
+
+@app.route('/bardetail', methods=['GET'])
+def bardetail():
+    if request.method == 'POST':
+        sortby = request.form['sortby']
+        sortorder = request.form['sortorder']
+        seasons = model.get_neighbors(sortby, sortorder)
+    else:
+        seasons = model.get_neighbors()
+
+    return render_template("bardetail.html", seasons=seasons)
 
 
 if __name__ == '__main__':
-    model.init_bball()
+    model.init_neighbors()
+    print('here we go', app.name)
     app.run(debug=True)

@@ -1,0 +1,42 @@
+<link rel="stylesheet" href="/static/style.css" />
+
+<h1>New York City Neighborhoods</h1>
+<div>
+    <p>
+        Browse the neighborhoods, and then input the neighborhood ID to view
+        bars in the neighborhood.
+    </p>
+</div>
+<form action="/neighborhoods" method="POST">
+    Neighborhood ID: <input type="text" name="nid" /><br />
+    <br />
+
+    Sort By:<br />
+    <input type="radio" name="sortby" value="bar_num" /> Number of Bars <br />
+    <input type="radio" name="sortby" value="avg_price" /> Price rating <br />
+    <input type="radio" name="sortby" value="alphabetical" /> Name <br />
+    <br />
+    Sort Order:<br />
+    <input type="radio" name="sortorder" value="asc" /> Ascending <br />
+    <input type="radio" name="sortorder" value="desc" /> Descending <br />
+    <br />
+    <input type="submit" name="update" value="Update" />
+    <br />
+    <br />
+</form>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Number of Bars</th>
+        <th>Average Price Rating</th>
+    </tr>
+    {% for s in nbs %}
+    <tr>
+        <td>{{s[0]}}1</td>
+        <td>{{s[1]}}</td>
+        <td>{{s[2]}}</td>
+        <td>{{s[3]}}</td>
+    </tr>
+    {% endfor %}
+</table>
