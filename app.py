@@ -32,7 +32,7 @@ def neighborhoods():
         neigh_id = ''
         nbs = model.get_neighbors()
 
-    return render_template("neighborhoods.html", nid=neigh_id, neighborhoods=nbs)
+    return render_template("neighborhoods.html", nid=neigh_id, nbs=nbs)
 
 
 @app.route('/bardetail', methods=['GET'])
@@ -49,5 +49,4 @@ def bardetail():
 
 if __name__ == '__main__':
     model.init_neighbors()
-    print('here we go', app.name)
     app.run(debug=True)
