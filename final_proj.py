@@ -273,7 +273,7 @@ def insert_data(bar_db, neigh_db):
         statement = 'INSERT INTO "Neighborhoods" '
         statement += 'VALUES (?, ?)'
         cur.execute(statement, insertion)
-    print('insert neighborhoods data.')
+    # print('insert neighborhoods data.')
 
     for inst in bar_db:
         insertion = (None, inst[0], float(inst[1]), inst[2], inst[3],
@@ -282,10 +282,75 @@ def insert_data(bar_db, neigh_db):
         statement += 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)'
         cur.execute(statement, insertion)
 
-    print('insert bar data')
+    # print('insert bar data')
     conn.commit()
     conn.close()
 
+
+def insert_calc_neigh():
+    ''' 
+    Add the number of bars and average bar price rating to the neighborhoods.
+    '''
+    # start the connection
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+
+    # calculate bar number, price ratings for each neighborhood
+    bar_statement = '''
+    SELECT Neighborhood, count(Id) as Bar_num, round(avg(Price),2) as Avg_Price
+    FROM Bars
+    GROUP by Neighborhood
+    '''
+
+    cur.execute(bar_statement)
+    conn.commit()
+    output = cur.fetchall()  # list of tuples
+
+    # update the neighborhoods column with new columns
+    statement = '''
+    ALTER TABLE Neighborhoods 
+    ADD COLUMN "Bar_Num" INT;
+    '''
+    cur.execute(statement)
+    conn.commit()
+
+    statement = '''
+    ALTER TABLE Neighborhoods 
+    ADD COLUMN "Avg_Price" REAL;
+    '''
+    cur.execute(statement)
+    conn.commit()
+
+    # insert data into neighborhoods db
+    for inst in output:
+        statement = '''
+        UPDATE Neighborhoods
+        SET Bar_Num = ''' + str(inst[1]) + ''', Avg_Price= ''' + str(inst[2])+'''
+        WHERE Id = ''' + str(inst[0])
+        cur.execute(statement)
+
+    conn.commit()
+    conn.close()
+
+
+def list_neighborhood(command):
+    '''
+    Select list neighborhood based on the command, default is by the order in the database
+    '''
+
+    # start the connection
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+
+    statement = '''
+    SELECT * 
+    FROM Neighborhoods
+    '''
+    cur.execute(statement)
+    conn.commit()
+    output = cur.fetchall()
+    conn.close()
+    return output
 
 # (barls, neighls) = get_bars()
 # neigh_dic = get_neigh(neighls)
@@ -295,8 +360,13 @@ def insert_data(bar_db, neigh_db):
 # create_bar_csv(barls)
 # create_neigh_csv(neigh_dic)
 
+
 bar_db = read_csv_to_db(BARSCSV, 'name')
 neigh_db = read_csv_to_db(NEIGHBORCSV, 'id')
 
 init_db()
 insert_data(bar_db, neigh_db)
+
+
+insert_calc_neigh()
+# print(list_neighborhood())
