@@ -1,25 +1,24 @@
-id,name
-1,East Village
-2,NOHO
-3,West Village
-4,Greenwich Village
-5,Nolita
-6,SoHo
-7,Little Italy
-8,Lower East Side
-9,Chinatown
-10,Tribeca
-11,Financial District
-12,Union Square
-13,Chelsea
-14,Flatiron
-15,Gramercy
-16,No neighborhood identified.
-17,Midtown East
-18,Midtown
-19,Midtown West
-20,Hell's Kitchen
-21,Upper East Side
-22,Upper West Side
-23,East Harlem
-24,Harlem
+1,East Village,12,1.5
+2,NOHO,1,1.0
+3,West Village,13,1.54
+4,Greenwich Village,8,1.75
+5,Nolita,1,2.0
+6,SoHo,6,1.83
+7,Little Italy,1,3.0
+8,Lower East Side,12,1.92
+9,Chinatown,1,1.0
+10,Tribeca,5,1.8
+11,Financial District,3,2.0
+12,Union Square,1,3.0
+13,Chelsea,6,2.17
+14,Flatiron,7,2.43
+15,Gramercy,8,2.0
+16,No neighborhood identified.,15,1.8
+17,Midtown East,3,2.33
+18,Midtown,4,1.75
+19,Midtown West,4,2.25
+20,Hell's Kitchen,5,1.8
+21,Upper East Side,4,2.0
+22,Upper West Side,6,1.67
+23,East Harlem,2,1.5
+24,Harlem,3,2.0

@@ -1,96 +1,45 @@
-from __future__ import print_function
+from flask import Flask, render_template, request
+import model
 
-import argparse
-import json
-import pprint
-import requests
-import sys
-import urllib
-import secrets
-
-# This client code can run on Python 2.x or 3.x.  Your imports can be
-# simpler if you only need one of those.
-try:
-    # For Python 3.0 and later
-    from urllib.error import HTTPError
-    from urllib.parse import quote
-    from urllib.parse import urlencode
-except ImportError:
-    # Fall back to Python 2's urllib2 and urllib
-    from urllib2 import HTTPError
-    from urllib import quote
-    from urllib import urlencode
-
-API_KEY = secrets.api_key
-# No long need clientid
-
-# ref: https://github.com/Yelp/yelp-fusion/blob/master/fusion/python/sample.py
-
-# API constants, you shouldn't have to change these.
-API_HOST = 'https://api.yelp.com'
-SEARCH_PATH = '/v3/businesses/search'
-BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
-
-# Create cache file
-CACHE_FNAME = 'yelp.json'
-
-try:
-    cache_file = open(CACHE_FNAME, 'r')
-    cache_content = cache_file.read()
-    CACHE_DICTION = json.loads(cache_content)
-    cache_file.close()
-except:
-    CACHE_DICTION = {}
-
-# helper function to create the unique url combo for cache entry
+app = Flask(__name__)
 
 
-def params_unique_combination(baseurl, params):
-    alphabetized_keys = sorted(params.keys())
-    res = []
-    for k in alphabetized_keys:
-        res.append("{}-{}".format(k, params[k]))
-    return baseurl + "_" + "_".join(res)
+@app.route('/')
+def index():
+    return '''
+        <img src="/static/drinks.jpg"/>
+        <h1>New York City Bar Explorations</h1>
+        <ul>
+            <li><a href="/neighborhoods">Start from a list of New York Neighborhoods.</a></li>
+            <li><a href="/bars'>Dive right into bars.</a></li>
+        </ul>
+    '''
 
 
-# The main cache function
-def make_request_using_cache(baseurl, params, auth):
-    unique_ident = params_unique_combination(baseurl, params)
-
-    # first, look in the cache to see if we already have this data
-    if unique_ident in CACHE_DICTION:
-        print("Getting cached data...")
-        return CACHE_DICTION[unique_ident]
-
-    # if not, fetch the data afresh, add it to the cache,
-    # then write the cache to file
+@app.route('/bars', methods=['GET', 'POST'])
+def hello():
+    if request.method == 'POST':
+        firstname = request.form['firstname']
+        lastname = request.form['lastname']
     else:
-        print("Making a request for new data...")
-        # Make the request and cache the new data
-        resp = requests.get(baseurl, params, auth=auth)
-        CACHE_DICTION[unique_ident] = json.loads(resp.text)
-        dumped_json_cache = json.dumps(
-            CACHE_DICTION, indent=4, ensure_ascii=False,)
-        fw = open(CACHE_FNAME, "w")
-        fw.write(dumped_json_cache)
-        fw.close()  # Close the open file
-        return CACHE_DICTION[unique_ident]
+        firstname = ''
+        lastname = ''
+
+    return render_template("hello.html", firstname=firstname, lastname=lastname)
 
 
-def get_busi():
+@app.route('/neighborhoods', methods=['GET', 'POST'])
+def bball():
+    if request.method == 'POST':
+        sortby = request.form['sortby']
+        sortorder = request.form['sortorder']
+        seasons = model.get_bball_seasons(sortby, sortorder)
+    else:
+        seasons = model.get_bball_seasons()
 
-    headers = {
-        'Authorization': 'Bearer %s' % API_KEY,
-    }
-
-    url_params = {
-        'categories': 'bars',
-        'location': 'New York City',
-        'limit': 50,
-    }
-
-    response = requests.request(
-        'GET', API_HOST+SEARCH_PATH, headers=headers, params=url_params)
+    return render_template("seasons.html", seasons=seasons)
 
 
-print(type(response))
+if __name__ == '__main__':
+    model.init_bball()
+    app.run(debug=True)

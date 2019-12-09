@@ -352,13 +352,35 @@ def list_neighborhood(command):
     conn.close()
     return output
 
-# (barls, neighls) = get_bars()
-# neigh_dic = get_neigh(neighls)
-# for bar in barls:
-#     bar.set_neigh(neigh_dic)  # update the foreign key
 
-# create_bar_csv(barls)
-# create_neigh_csv(neigh_dic)
+def update_neigh_csv():
+    # reference: https://stackoverflow.com/questions/18827028/write-to-csv-from-sqlite3-database-in-python
+    with sqlite3.connect("nycbars.db") as connection:
+        csvWriter = csv.writer(open("data/neighborhoods.csv", "w"))
+        # add header
+        # fieldnames = ['id', 'name']
+        # writer = csv.DictWriter(bars, fieldnames=fieldnames)
+        # writer.writeheader()
+
+        cur = connection.cursor()
+
+        statement = '''
+        SELECT * 
+        FROM Neighborhoods
+        '''
+        cur.execute(statement)
+        connection.commit()
+        rows = cur.fetchall()
+        csvWriter.writerows(rows)
+
+
+(barls, neighls) = get_bars()
+neigh_dic = get_neigh(neighls)
+for bar in barls:
+    bar.set_neigh(neigh_dic)  # update the foreign key
+
+create_bar_csv(barls)
+create_neigh_csv(neigh_dic)
 
 
 bar_db = read_csv_to_db(BARSCSV, 'name')
@@ -370,3 +392,4 @@ insert_data(bar_db, neigh_db)
 
 insert_calc_neigh()
 # print(list_neighborhood())
+update_neigh_csv()
