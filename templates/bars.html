@@ -2,12 +2,18 @@
 
 {% if nid == '' %}
 <h2>What is the neighborhood you want to explore?</h2>
-<p>Please input the neighborhood ID.</p>
+<br />
 {% else %}
 <h2>Here are the bars in {{filtered_bars[0][-1]}}</h2>
 <br />
 {% endif %}
 
+<div>
+    <p>
+        If you want to see neighborhood level information, please
+        <a href="/neighborhoods">click here</a>.
+    </p>
+</div>
 <form action="/bars" method="POST">
     The Neighborhood ID that you would like to view:
     <input type="text" name="nid" />
@@ -16,7 +22,7 @@
     <input type="submit" value="submit" />
 </form>
 
-<table border="1">
+<table align="center" border="1">
     <tr>
         <!-- <th>ID</th> -->
         <th>Bar Name</th>
