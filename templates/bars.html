@@ -1,13 +1,40 @@
-{% if firstname == '' %}
-<h2>What is your name?</h2>
+<link rel="stylesheet" href="/static/style.css" />
+
+{% if nid == '' %}
+<h2>What is the neighborhood you want to explore?</h2>
+<p>Please input the neighborhood ID.</p>
 {% else %}
-<h2>Hello {{firstname}} {{lastname}}</h2>
-Would you like to change your name? <br />
+<h2>Here are the bars in {{filtered_bars[0][-1]}}</h2>
+<br />
 {% endif %}
 
 <form action="/bars" method="POST">
-    First Name: <input type="text" name="firstname" /> <br />
-    Last Name: <input type="text" name="lastname" /> <br />
-
+    The Neighborhood ID that you would like to view:
+    <input type="text" name="nid" />
+    <br />
+    <br />
     <input type="submit" value="submit" />
 </form>
+
+<table border="1">
+    <tr>
+        <!-- <th>ID</th> -->
+        <th>Bar Name</th>
+        <th>Price Rating</th>
+        <th>Phone</th>
+        <th>Address</th>
+        <th>Neighborhood</th>
+
+        <!-- <th>Number of Bars</th>
+        <th>Average Price Rating</th> -->
+    </tr>
+    {% for b in filtered_bars %}
+    <tr>
+        <td><a class="barurl" href="{{b[2]}}">{{b[0]}}</a></td>
+        <td>{{b[1]}}</td>
+        <td>{{b[3]}}</td>
+        <td>{{b[4]}}</td>
+        <td>{{b[5]}}</td>
+    </tr>
+    {% endfor %}
+</table>

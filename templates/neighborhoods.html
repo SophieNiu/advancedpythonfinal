@@ -8,13 +8,27 @@
     </p>
 </div>
 
-<form action="/neighborhoods" method="POST">
+<div>
+    <p>
+        Memorize one neighborhood ID and
+        <a href="/bars" style="color:black">let's go</a> to see what bars are in
+        the neighbor.
+    </p>
+</div>
+<!-- <form action="/neighborhoods" method="POST">
     Neighborhood ID: <input type="text" name="nid" /><br />
     <br />
-    <input type="submit" value="View bars" />
-</form>
+    <input type="submit" value="View bars" href="/bars.html" />
+</form> -->
+
 <form action="/neighborhoods" method="POST">
     Sort By:<br />
+    <!-- <select>
+        <option name="sortby" value="bar_num">Number of Bars</option>
+        <option name="sortby" value="avg_price">Price Rating</option>
+        <option name="sortby" value="alphabetical">Name</option>
+    </select> -->
+
     <input type="radio" name="sortby" value="bar_num" /> Number of Bars <br />
     <input type="radio" name="sortby" value="avg_price" /> Price rating <br />
     <input type="radio" name="sortby" value="alphabetical" /> Name <br />
@@ -27,6 +41,7 @@
     <br />
     <br />
 </form>
+
 <table border="1">
     <tr>
         <th>ID</th>

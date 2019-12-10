@@ -1,8 +1,10 @@
 # model.py
 import csv
+import sqlite3
 
+DBNAME = 'nycbars.db'
 NB_FILE_NAME = 'data/neighborhoods.csv'
-BAR_FILE_NAME = 'data/bars.csv'
+BAR_FILE_NAME = 'data/bars_info.csv'
 
 neighbors = []
 
@@ -32,3 +34,21 @@ def get_neighbors(sortby='bar_num', sortorder='desc'):
     rev = (sortorder == 'desc')
     sorted_list = sorted(neighbors, key=lambda row: row[sortcol], reverse=rev)
     return sorted_list
+
+
+def get_filtered_bars(nid=0):
+    conn = sqlite3.connect(DBNAME)
+    cur = conn.cursor()
+    statement = '''
+    SELECT Name,Price,Website, Phone,Address,NeighName
+    FROM Bars JOIN Neighborhoods 
+    ON Bars.Neighborhood= Neighborhoods.Id
+    '''
+    if nid != 0:
+        statement += '''WHERE Neighborhoods.Id = ''' + str(nid)
+
+    cur.execute(statement)
+    filtered_bars = cur.fetchall()  # list of tuples
+    conn.commit()
+    conn.close()
+    return filtered_bars

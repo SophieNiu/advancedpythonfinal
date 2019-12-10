@@ -198,7 +198,7 @@ def make_request_using_cache(baseurl, endurl=""):
 
 ### create table and set up database ###
 
-# Part 1: Read data from CSV and JSON into a new database called nycbars.db
+# Read data from CSV and JSON into a new database called nycbars.db
 DBNAME = 'nycbars.db'
 BARSCSV = 'data/bars_info.csv'
 NEIGHBORCSV = 'data/neighborhoods.csv'

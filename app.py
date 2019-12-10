@@ -12,13 +12,13 @@ def index():
 @app.route('/bars', methods=['GET', 'POST'])
 def bars():
     if request.method == 'POST':
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
+        nid = request.form['nid']
+        fbars = model.get_filtered_bars(nid)
     else:
-        firstname = ''
-        lastname = ''
+        nid = ''
+        fbars = model.get_filtered_bars()
 
-    return render_template("bars.html", firstname=firstname, lastname=lastname)
+    return render_template("bars.html", nid=nid, filtered_bars=fbars)
 
 
 @app.route('/neighborhoods', methods=['GET', 'POST'])
@@ -26,13 +26,12 @@ def neighborhoods():
     if request.method == 'POST':
         sortby = request.form['sortby']
         sortorder = request.form['sortorder']
-        neigh_id = request.form['nid']
+        # neigh_id = request.form['nid']
         nbs = model.get_neighbors(sortby, sortorder)
     else:
-        neigh_id = ''
         nbs = model.get_neighbors()
 
-    return render_template("neighborhoods.html", nid=neigh_id, nbs=nbs)
+    return render_template("neighborhoods.html", nbs=nbs)  # nid= neigh_id
 
 
 @app.route('/bardetail', methods=['GET'])
