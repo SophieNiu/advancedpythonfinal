@@ -83,3 +83,7 @@ table {
     text-align: center;
     justify-content: center;
 }
+
+form {
+    display: inline;
+}
