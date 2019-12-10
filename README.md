@@ -14,12 +14,14 @@ In the project, I scraped over 130 pages which includes a list of bars in the Ne
 ## Code Structure 
 
 - final_proj.py
+
 I started by scraping the page with cache system, creating a list of bars utilizing the Bar class. 
 Then created a list of neighborhoods name with ability to catch the bars that don't associate with a neighborhood.
 I then saved the bars into the bars_info.csv file, and the neighborhoods in a neighborhoods.csv file.
 By creating the Bars and Neighborhood tables in the nycbars.db database, I populated the table with the information in csv file through init_db(), insert_data(). Then I calculated average price ratings in each neighborhood and count the number of bars in each neighborhood using the insert_calc_neigh(), and updating the information into the neighborhoods.csv through update_neigh_csv().
 
 - model.py
+
 init_neighbors() creates the table for the list of neighbors from the associated csv file. 
 get_neighbors() updates the table content based on the sorting requirement input by the user. 
 get_filtered_bars() calls the databse and updates the list of bars based on the neighborhood id of interest. 
