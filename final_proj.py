@@ -71,7 +71,7 @@ def get_bars():
             bar_neigh = bar_neigh.select(
                 'a[href^="/new-york/neighborhoods/"]')[0].text
         except:
-            bar_neigh = 'No neighborhood identified.'
+            bar_neigh = 'No associated neighborhood'
 
         # review contains double quotes and single quotes
         try:
